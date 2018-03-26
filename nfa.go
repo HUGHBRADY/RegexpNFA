@@ -22,9 +22,34 @@ func poregtonfa(postfix string) *nfa {
 		for _, r := pofix {
 			switch r {
 			case '.':
-				
-			case '|':
+				// Take two elements off nfa stack
+				frag2 := nfastack[len(nfastack)-1]
+				// Get rid of last element on stack
+				nfastack = nfastack[:len(nfastack)-1]
 
+				frag1 := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
+
+				// Joins the accept state of frag1 to initial state of frag2
+				frag1.accept.edge1 = frag2.initial
+
+				nfastack = append(nfastack, &nfa{initial: frag1.initial, accept: frag2.accept})
+
+			case '|':
+				// Take two elements off nfa stack
+				frag2 := nfastack[len(nfastack)-1]
+				// Get rid of last element on stack
+				nfastack = nfastack[:len(nfastack)-1]
+
+				frag1 := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
+
+				accept := state{}
+				initial := state{edge1: frag1.initial, edge2: frag2.initial}
+				frag1.accept.edge1 = &accept
+				frag2.accept.edge1 = &accept
+				
+				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 			case '*':
 
 			default:
