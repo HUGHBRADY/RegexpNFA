@@ -75,7 +75,53 @@ func poregtonfa(postfix string) *nfa {
 	return nfastack[0]
 }
 
+func addState(1 []*state, s *state, a *state) []*state {
+	l = append(l, s)
+
+	if s != a && s.symbol == 0 {
+		l = addState(l, s.edge1, a)
+		if s.edge2 != nil {
+			l = addState(l, s.edge2, a)
+		}
+	}
+}
+
+// Function that checks if regexp matches string
+func postmatch(po string, input string) bool {
+	ismatch := false
+	ponfa := poregtonfa(po)
+
+	// List of states you're currently in in NFA
+	current := []*state{}
+	next := []*state{}
+
+	// List of current states 
+	current = addState(current[:], ponfa.initial, ponfa.accept)
+
+	// Loop through input string
+	for _, r := range input {
+		// Loop through current state
+		for _, s := range current {
+			// If symbol in current state == the character you're reading from input
+			if s.symbol == r {
+				next = addState(next[:], s.edge1, ponfa.accept)
+			}
+		}
+		// Move from current state to the next state
+		current, next = next, []*state{}
+	}
+
+	for _, s := range current {
+		// If current (final) state is accepted
+		if s == ponfa.accept {
+			ismatch = true
+			break
+		}
+	}
+
+	return ismatch
+}
+
 func main() {
-	nfa := poregtonfa("ab.c*|")
-	fmt.Println(nfa)
+	fmt.Println(postmatch("ab.c*|", "cccc"))
 }
