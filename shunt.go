@@ -48,8 +48,8 @@ func intopost(infix string) string {
 
 func main() {
 	// Answer ab.c*
-	fmt.Println("Infix:		", "a.b.c*")
-	fmt.Println("Postfix: 	", intopost("a.b.c*"))
+	fmt.Println("Infix:		", "a.b|c*")
+	fmt.Println("Postfix: 	", intopost("a.b|c*"))
 
 	// Answer abd|.*
 	fmt.Println("Infix:		", "(a.(b|d))")

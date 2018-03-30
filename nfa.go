@@ -15,6 +15,49 @@ type nfa struct {
 	accept  *state
 }
 
+// This function transforms regular expressions from infix to postfix
+func topostfix(infix string) string {
+	// Maps runes to ints. These are ordered by precedence
+	specials := map[rune]int{'*': 10, '.': 9, '|': 8}
+
+	postfix, s := []rune{}, []rune{}
+
+	// Loop over infix string a char at a time
+	for _, r := range infix {
+		switch {
+		case r == '(':
+			// Throws open bracket onto s stack
+			s = append(s, r)
+		case r == ')':
+			// Loop through stack until you see open bracket
+			for s[len(s)-1] != '(' {
+				// Keep popping chars off stack and appending to postfix
+				postfix, s = append(postfix, s[len(s)-1]), s[:len(s)-1]
+			}
+			// Finally, discard open bracket
+			s = s[:len(s)-1]
+		case specials[r] > 0:
+			// while stack has elements, and precedence of the character <= the precedence of last element
+			for len(s) > 0 && specials [r] <= specials[s[len(s)-1]] {
+				// Pop the elements off top of stack and append to postfix
+				postfix, s = append(postfix, s[len(s)-1]), s[:len(s)-1]
+			}
+			s = append(s, r)
+		// Normal characters eg a, b, c
+		default:
+			// Appends r to the end of the postfix[]
+			postfix = append(postfix, r)
+		}
+	}
+
+	// If anything is left in the stack pop it into postfix 
+	for len(s) > 0 {
+		postfix, s = append(postfix, s[len(s)-1]), s[:len(s)-1]
+	}
+
+	return string(postfix)
+}
+
 func poregtonfa(postfix string) *nfa {
 	// Provides an array of pointers to nfa (struct above) that is empty
 	nfastack := []*nfa{}	
@@ -91,7 +134,9 @@ func addState(l []*state, s *state, a *state) []*state {
 }
 
 // Function that checks if regexp matches string
-func postmatch(po string, input string) bool {
+func regexpmatch(infix string, input string) bool {
+	// Convert expression into postfix
+	po := topostfix(infix)
 	ismatch := false
 	ponfa := poregtonfa(po)
 
@@ -127,5 +172,5 @@ func postmatch(po string, input string) bool {
 }
 
 func main() {
-	fmt.Println(postmatch("ab.c*|", "def"))
+	fmt.Println(regexpmatch("a.b|c*", "ccccccccc"))
 }
