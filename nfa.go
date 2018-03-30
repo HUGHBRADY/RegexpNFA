@@ -118,6 +118,17 @@ func poregtonfa(postfix string) *nfa {
 				// Push new fragment to nfa stack
 				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 			case '?':
+				// Pop a fragment off the stack
+				frag := nfastack[len(nfastack)-1]
+				nfastack = nfastack[:len(nfastack)-1]
+
+				accept := state{}
+				initial := state{edge1: frag.initial, edge2: &accept}
+
+				frag.accept.edge1 = &accept
+
+				// Push new fragment to nfa stack
+				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 			default:
 				accept := state{}
 				initial := state{symbol: r, edge1: &accept}
@@ -188,5 +199,5 @@ func regexpmatch(infix string, input string) bool {
 }
 
 func main() {
-	fmt.Println(regexpmatch("a.b+.c", "abbbbc"))
+	fmt.Println(regexpmatch("a?.b+.c", "aabbbbc"))
 }
