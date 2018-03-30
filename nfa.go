@@ -75,15 +75,19 @@ func poregtonfa(postfix string) *nfa {
 	return nfastack[0]
 }
 
-func addState(1 []*state, s *state, a *state) []*state {
+// Will add a state as well as all states that can then be reached using empty strings 
+func addState(l []*state, s *state, a *state) []*state {
 	l = append(l, s)
 
+	// If state has empty strings "paths"
 	if s != a && s.symbol == 0 {
 		l = addState(l, s.edge1, a)
 		if s.edge2 != nil {
 			l = addState(l, s.edge2, a)
 		}
 	}
+
+	return l
 }
 
 // Function that checks if regexp matches string
@@ -95,7 +99,7 @@ func postmatch(po string, input string) bool {
 	current := []*state{}
 	next := []*state{}
 
-	// List of current states 
+	// Initialise current array with initial states in NFA 
 	current = addState(current[:], ponfa.initial, ponfa.accept)
 
 	// Loop through input string
@@ -123,5 +127,5 @@ func postmatch(po string, input string) bool {
 }
 
 func main() {
-	fmt.Println(postmatch("ab.c*|", "cccc"))
+	fmt.Println(postmatch("ab.c*|", "def"))
 }
