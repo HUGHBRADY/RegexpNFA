@@ -160,12 +160,10 @@ func addState(l []*state, s *state, a *state) []*state {
 }
 
 // Function that checks if regexp matches string
-func regexpmatch(infix string, input string) bool {
-	// Convert expression into postfix
-	po := topostfix(infix)
-	fmt.Println("Postfix: ", po)
+func regexpmatch(userexp string, input string) bool {
+	
 	ismatch := false
-	ponfa := poregtonfa(po)
+	ponfa := poregtonfa(userexp)
 
 	// List of states you're currently in in NFA
 	current := []*state{}
@@ -203,12 +201,12 @@ func main() {
 	var choice int
 
 	fmt.Println("Enter a number to select that option.")
-	fmt.Println("1) Enter your own regexp \n2) Enter a preset regexp ")
+	fmt.Println("1) Enter your own regexp \n2) Use a preset regexp ")
 	fmt.Scan(&choice)
 
 	if choice == 1 {
 		fmt.Println("Enter a regexp: ")
-		fmt.Scan(&userstring)
+		fmt.Scanf("%s", &userstring)
 	} else if choice == 2 {
 		fmt.Println("\nEnter a number to select that option.\n1) a.b|c* \n2) (a.(b|d)) \n3) a.(b|d).c*")
 		fmt.Scan(&choice)
@@ -227,6 +225,10 @@ func main() {
 		fmt.Println("Aye good job, you're getting this regexp: a.b|c*")
 		userexp = "a.b|c*"
 	}
+
+	// Convert expression into postfix
+	userexp = topostfix(userexp)
+	fmt.Println("Postfix: ", userexp)
 
 	fmt.Println("Enter a string to test: ")
 	fmt.Scan(&userstring)
