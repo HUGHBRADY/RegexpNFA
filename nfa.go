@@ -15,31 +15,31 @@ type nfa struct {
 	accept  *state
 }
 
-// This function transforms regular expressions from infix to postfix
+// This function transforms regular expressions from infix to postfix.
 func topostfix(infix string) string {
-	// Maps runes to ints. These are ordered by precedence
+	// Maps runes to ints. These are ordered by precedence.
 	specials := map[rune]int{'*': 10, '.': 9, '|': 8, '+': 11, '?': 12}
 
 	postfix, s := []rune{}, []rune{}
 
-	// Loop over infix string a char at a time
+	// Loop over infix string a char at a time.
 	for _, r := range infix {
 		switch {
 		case r == '(':
-			// Throws open bracket onto stack
+			// Throws open bracket onto stack.
 			s = append(s, r)
 		case r == ')':
-			// Loop through stack until you see open bracket
+			// Loop through stack until you see open bracket.
 			for s[len(s)-1] != '(' {
-				// Keep popping chars off stack and appending to postfix
+				// Keep popping chars off stack and appending to postfix.
 				postfix, s = append(postfix, s[len(s)-1]), s[:len(s)-1]
 			}
-			// Finally, discard open bracket
+			// Finally, discard open bracket.
 			s = s[:len(s)-1]
 		case specials[r] > 0:
-			// while stack has elements, and precedence of the character <= the precedence of last element
+			// while stack has elements, and precedence of the character <= the precedence of last element.
 			for len(s) > 0 && specials [r] <= specials[s[len(s)-1]] {
-				// Pop the elements off top of stack and append to postfix
+				// Pop the elements off top of stack and append to postfix.
 				postfix, s = append(postfix, s[len(s)-1]), s[:len(s)-1]
 			}
 			s = append(s, r)
@@ -50,7 +50,7 @@ func topostfix(infix string) string {
 		}
 	}
 
-	// If anything is left in the stack pop it into postfix 
+	// If anything is left in the stack pop it into postfix.
 	for len(s) > 0 {
 		postfix, s = append(postfix, s[len(s)-1]), s[:len(s)-1]
 	}
@@ -59,26 +59,26 @@ func topostfix(infix string) string {
 }
 
 func poregtonfa(postfix string) *nfa {
-	// Provides an array of pointers to nfa (struct above) that is empty
+	// Provides an array of pointers to nfa (struct above) that is empty.
 	nfastack := []*nfa{}	
 	
 		for _, r := range postfix {
 			switch r {
 			case '.':
-				// Take two fragments off nfa stack and get rid of last element on stack
+				// Take two fragments off nfa stack and get rid of last element on stack.
 				frag2 := nfastack[len(nfastack)-1]
 				nfastack = nfastack[:len(nfastack)-1]
 
 				frag1 := nfastack[len(nfastack)-1]				
 				nfastack = nfastack[:len(nfastack)-1]
 
-				// Joins the accept state of frag1 to initial state of frag2
+				// Joins the accept state of frag1 to initial state of frag2.
 				frag1.accept.edge1 = frag2.initial
 
 				nfastack = append(nfastack, &nfa{initial: frag1.initial, accept: frag2.accept})
 
 			case '|':
-				// Take two fragments off nfa stack and get rid of last element on stack
+				// Take two fragments off nfa stack and get rid of last element on stack.
 				frag2 := nfastack[len(nfastack)-1]
 				nfastack = nfastack[:len(nfastack)-1]
 
@@ -92,20 +92,20 @@ func poregtonfa(postfix string) *nfa {
 				 
 				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 			case '*':
-				// Pop a fragment off the stack
+				// Pop a fragment off the stack.
 				frag := nfastack[len(nfastack)-1]
 				nfastack = nfastack[:len(nfastack)-1]
 
 				accept := state{}
 				initial := state{edge1: frag.initial, edge2: &accept}
-				// Define where accept state of fragment points
+				// Define where accept state of fragment points.
 				frag.accept.edge1 = frag.initial
 				frag.accept.edge2 = &accept
 
-				// Push new fragment to nfa stack
+				// Push new fragment to nfa stack.
 				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})	
 			case '+':
-				// Pop a fragment off the stack
+				// Pop a fragment off the stack.
 				frag := nfastack[len(nfastack)-1]
 				nfastack = nfastack[:len(nfastack)-1]
 
@@ -115,10 +115,10 @@ func poregtonfa(postfix string) *nfa {
 
 				frag.accept.edge1 = &middle
 
-				// Push new fragment to nfa stack
+				// Push new fragment to nfa stack.
 				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 			case '?':
-				// Pop a fragment off the stack
+				// Pop a fragment off the stack.
 				frag := nfastack[len(nfastack)-1]
 				nfastack = nfastack[:len(nfastack)-1]
 
@@ -127,7 +127,7 @@ func poregtonfa(postfix string) *nfa {
 
 				frag.accept.edge1 = &accept
 
-				// Push new fragment to nfa stack
+				// Push new fragment to NFA stack.
 				nfastack = append(nfastack, &nfa{initial: &initial, accept: &accept})
 			default:
 				accept := state{}
@@ -137,7 +137,7 @@ func poregtonfa(postfix string) *nfa {
 			}
 		}
 
-	// Make sure only one element in nfaStack
+	// Make sure only one element in nfaStack.
 	if len(nfastack) != 1 {
 		fmt.Println("Error! NFA invalid ", len(nfastack), nfastack)
 	}
@@ -145,7 +145,7 @@ func poregtonfa(postfix string) *nfa {
 	return nfastack[0]
 }
 
-// Will add a state as well as all states that can then be reached using empty strings 
+// Will add a state as well as all states that can then be reached using empty strings.
 func addState(l []*state, s *state, a *state) []*state {
 	l = append(l, s)
 
@@ -159,34 +159,34 @@ func addState(l []*state, s *state, a *state) []*state {
 	return l
 }
 
-// Function that checks if regexp matches string
+// Function that checks if regexp matches string.
 func regexpmatch(userexp string, input string) bool {
 	
 	ismatch := false
 	ponfa := poregtonfa(userexp)
 
-	// List of states you're currently in in NFA
+	// List of states you're currently in in NFA.
 	current := []*state{}
 	next := []*state{}
 
-	// Initialise current array with initial states in NFA 
+	// Initialise current array with initial states in NFA.
 	current = addState(current[:], ponfa.initial, ponfa.accept)
 
-	// Loop through input string
+	// Loop through input string.
 	for _, r := range input {
-		// Loop through current state
+		// Loop through current state.
 		for _, s := range current {
-			// If symbol in current state == the character you're reading from input
+			// If symbol in current state == the character you're reading from input.
 			if s.symbol == r {
 				next = addState(next[:], s.edge1, ponfa.accept)
 			}
 		}
-		// Move from current state to the next state
+		// Move from current state to the next state.
 		current, next = next, []*state{}
 	}
 
 	for _, s := range current {
-		// If current (final) state is accepted
+		// If current (final) state is accepted.
 		if s == ponfa.accept {
 			ismatch = true
 			break
@@ -197,41 +197,18 @@ func regexpmatch(userexp string, input string) bool {
 }
 
 func main() {
-	var userexp, userstring string
-	var choice int
+	var userexp, poreg, userstring string
 
-	fmt.Println("Enter a number to select that option.")
-	fmt.Println("1) Enter your own regexp \n2) Use a preset regexp ")
-	fmt.Scan(&choice)
+	fmt.Print("Enter a regexp: ")
+	fmt.Scanln(&userexp)
 
-	if choice == 1 {
-		fmt.Println("Enter a regexp: ")
-		fmt.Scanf("%s", &userstring)
-	} else if choice == 2 {
-		fmt.Println("\nEnter a number to select that option.\n1) a.b|c* \n2) (a.(b|d)) \n3) a.(b|d).c*")
-		fmt.Scan(&choice)
-		switch choice {
-		case 1: 
-			userexp = "a.b|c*"
-		case 2:
-			userexp = "(a.(b|d))"
-		case 3: 
-			userexp = "a.(b|d).c*"
-		default: 
-			fmt.Println("Aye good job, you're getting this regexp: a.b|c*")
-			userexp = "a.b|c*"
-		}
-	} else {
-		fmt.Println("Aye good job, you're getting this regexp: a.b|c*")
-		userexp = "a.b|c*"
-	}
+	// Convert expression into postfix.
+	poreg = topostfix(userexp)
+	fmt.Println("\nPostfix: ", poreg)
 
-	// Convert expression into postfix
-	userexp = topostfix(userexp)
-	fmt.Println("Postfix: ", userexp)
-
-	fmt.Println("Enter a string to test: ")
+	fmt.Print("Enter a string to test: ")
 	fmt.Scan(&userstring)
 
-	fmt.Println(regexpmatch(userexp, userstring))
+	// Check if string matches regexp.
+	fmt.Println(regexpmatch(poreg, userstring))
 }
